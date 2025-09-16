@@ -9,10 +9,22 @@ BEGIN
 	DECLARE i INT DEFAULT 0;
 	WHILE i < 12
 	DO
-		SET total_sum = total_sum + (emso / POW(10, 12 - i) % POW(10, i)) * ;
+		SET total_sum = total_sum + (emso / POW(10, 12 - i) % 10) * (7 - i % 6);
 		
 		SET i = i + 1;
 	END WHILE;
+	
+	SET control_number = total_sum % 11;
+	
+	IF control_number != 0
+	THEN
+		SET control_number = 11 - control_number;
+	END IF;
+	
+	IF control_number = 10
+	THEN
+		CALL calculate_control_number(emso + 10, control_number);
+	END IF;
 END;
 $$
 delimiter ;
@@ -24,7 +36,13 @@ RETURNS BOOL
 BEGIN
 	-- validate date here
 	
+	DECLARE control_number INT;
+	CALL calculate_control_number(emso, control_number);
 	
+	RETURN control_number = emso % 10;
 END;
 $$
 delimiter ;
+
+SELECT is_emso_valid(0901007500200);
+SELECT is_emso_valid(2905007500394);
